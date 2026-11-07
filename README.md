@@ -6,6 +6,17 @@ PetNickname gives your pet a nickname that only you can see. Made for warlocks w
 
 Built for WoW Forever (interface 16001).
 
+## Download
+
+- [CurseForge](https://www.curseforge.com/wow/addons/petnickname), or search for "PetNickname" in the CurseForge app
+- [GitHub releases](https://github.com/HydraxSkarrag/PetNickname/tags)
+
+## Video
+
+[![Watch the PetNickname video on YouTube](screenshots/video-thumbnail.jpg)](https://www.youtube.com/watch?v=WvzhqTyGl3M)
+
+33 seconds on YouTube: from Thokkresh to Angus.
+
 ## Before and after
 
 Before: the game calls him Thokkresh.
