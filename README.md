@@ -1,6 +1,6 @@
 # PetNickname
 
-Your Voidwalker is called Thokkresh. You would rather call him Angus. Now you can.
+Your Voidwalker is called Thokkresh? You would rather call him Angus? Now you can!
 
 PetNickname gives your pet a nickname that only you can see. Made for warlocks who want something better than the name the game rolled for their demon, but it works for any pet.
 
