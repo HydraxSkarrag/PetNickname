@@ -39,9 +39,11 @@ Nicknames are saved per character and keyed by the pet's real name, so your Imp,
 
 ## Where Angus shows up
 
-- EllesmereUI unit frames: Pet, Target, Target of Target, Focus and Focus Target
+- Unit frames: pet, target, target of target, focus and focus target. Works with Blizzard's default frames, EllesmereUI and other unit frame addons.
 - His nameplate, if you show nameplates for your pet
 - The unit tooltip
+
+PetNickname does not need to know your unit frame addon. It looks for frames that show a unit and swaps the pet's real name for the nickname in their text, nothing else.
 
 ## Limits
 

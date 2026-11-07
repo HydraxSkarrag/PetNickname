@@ -1,9 +1,15 @@
--------------------------------------------------------------------------------
+ -------------------------------------------------------------------------------
 --  PetNickname
 --  Shows a nickname of your choice for your own pet, client side only: on
---  the EllesmereUI unit frames (Pet, Target, Target of Target, Focus, Focus
---  Target), on its nameplate and in its tooltip. The floating name above the
---  pet in the 3D world is drawn by the engine and cannot be changed by addons.
+--  every unit frame that shows the pet (Blizzard's default frames, EllesmereUI
+--  and other unit frame addons), on its nameplate and in its tooltip. The
+--  floating name above the pet in the 3D world is drawn by the engine and
+--  cannot be changed by addons.
+--
+--  How it works: unit frames are found by their unit (the `unit` attribute or
+--  field). Every font string inside such a frame gets a post-hook on SetText
+--  and SetFormattedText; when the frame shows your pet, the pet's real name in
+--  that text is swapped for the nickname. No frame layout is touched.
 --
 --  /petname <name>   give your current pet a nickname
 --  /petname reset    remove the nickname of your current pet
@@ -15,7 +21,10 @@
 local ADDON = ...
 
 local PREFIX = "|cff9482c9PetNickname|r: "
-local UNIT_FRAMES = {
+-- Frames scanned on every target or focus change. Everything else is found
+-- by the full scan (FullScan) on login, pet summon and /petname.
+local KNOWN_FRAMES = {
+    "PetFrame", "TargetFrame", "TargetFrameToT", "FocusFrame", "FocusFrameToT",
     "EllesmereUIUnitFrames_Pet",
     "EllesmereUIUnitFrames_Target",
     "EllesmereUIUnitFrames_TargetTarget",
@@ -98,10 +107,33 @@ local function HookFontString(fs, getUnit)
     Fix(fs)
 end
 
+-- The unit a frame shows, or nil if it is no unit frame. EllesmereUI keeps
+-- its live token in _euiUnit, Blizzard and most addons in .unit, secure unit
+-- buttons in the "unit" attribute.
+local function FrameUnit(f)
+    if f.IsForbidden and f:IsForbidden() then return nil end
+    local u = rawget(f, "_euiUnit")
+    if type(u) ~= "string" then u = rawget(f, "unit") end
+    if type(u) ~= "string" and f.GetAttribute then
+        local ok, a = pcall(f.GetAttribute, f, "unit")
+        if ok and type(a) == "string" then u = a end
+    end
+    if type(u) == "string" and not IsSecret(u) and u ~= "" then return u end
+    return nil
+end
+
+local function UnitGetter(f)
+    return function() return FrameUnit(f) end
+end
+
+-- Hooks all font strings below `frame`. A child that is a unit frame of its
+-- own (Target of Target inside the Target frame) brings its own unit.
 local function Collect(frame, getUnit, depth)
     depth = depth or 0
     if not frame or depth > 8 then return end
     if frame.IsForbidden and frame:IsForbidden() then return end
+    if FrameUnit(frame) then getUnit = UnitGetter(frame) end
+    if not getUnit then return end
     for _, region in ipairs({ frame:GetRegions() }) do
         if region.GetObjectType and region:GetObjectType() == "FontString" then
             HookFontString(region, getUnit)
@@ -112,12 +144,30 @@ local function Collect(frame, getUnit, depth)
     end
 end
 
-local function ScanUnitFrames()
-    for _, name in ipairs(UNIT_FRAMES) do
+local function ScanKnownFrames()
+    for _, name in ipairs(KNOWN_FRAMES) do
         local f = _G[name]
-        if f then
-            Collect(f, function() return f._euiUnit or f:GetAttribute("unit") end)
-        end
+        if type(f) == "table" and f.GetObjectType then Collect(f) end
+    end
+end
+
+-- Only frames whose unit can ever be your pet: pet frames, target, focus,
+-- their targets and mouseover. Player, party, raid, boss and arena frames are
+-- left alone, so as few Blizzard frames as possible are touched.
+local function RelevantUnit(u)
+    u = string.lower(u)
+    return string.find(u, "pet", 1, true) or string.find(u, "target", 1, true)
+        or string.find(u, "focus", 1, true) or u == "mouseover"
+end
+
+-- Walks every frame in the UI and hooks the unit frames that can show your
+-- pet. Covers any unit frame addon without knowing its frame names.
+local function FullScan()
+    local f = EnumerateFrames()
+    while f do
+        local u = FrameUnit(f)
+        if u and RelevantUnit(u) then Collect(f) end
+        f = EnumerateFrames(f)
     end
 end
 
@@ -214,7 +264,7 @@ SlashCmdList.PETNICKNAME = function(msg)
 
     local old = NickFor(real)
     DB.names[real] = msg
-    ScanUnitFrames()
+    FullScan()
     RefreshAll(old)
     Print(real .. " is now called " .. msg .. ".")
 end
@@ -244,15 +294,15 @@ ev:SetScript("OnEvent", function(_, event, arg1)
         ScanNameplate(arg1)
     elseif event == "UNIT_PET" then
         if arg1 == "player" then
-            ScanUnitFrames()
+            FullScan()
             C_Timer.After(0.5, function() RefreshAll() end)
         end
     elseif event == "PLAYER_ENTERING_WORLD" then
         C_Timer.After(1, function()
-            ScanUnitFrames()
+            FullScan()
             RefreshAll()
         end)
     else
-        ScanUnitFrames()
+        ScanKnownFrames()
     end
 end)
