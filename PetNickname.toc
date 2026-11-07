@@ -1,0 +1,10 @@
+## Interface: 16001
+## Title: PetNickname
+## Notes: Give your pet a nickname that only you see, on its unit frames, nameplate and tooltip. Type /petname
+## Author: Daniel
+## Version: 1.1.0
+## IconTexture: Interface\Icons\Spell_Shadow_SummonVoidWalker
+## Category: Unit Frames
+## SavedVariablesPerCharacter: PetNicknameDB
+
+PetNickname.lua
