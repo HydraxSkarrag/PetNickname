@@ -2,7 +2,7 @@
 
 Your Voidwalker is called Thokkresh? You would rather call him Angus? Now you can!
 
-PetNickname gives your pet a nickname that only you can see. Made for warlocks who want something better than the name the game rolled for their demon, but it works for any pet.
+PetNickname gives your pet a nickname that only you can see. Made for warlocks who want something better than the name the game rolled for their demon, but it works for any pet, and for your companions from the pet collection too.
 
 Built for WoW Forever (interface 16001).
 
@@ -47,6 +47,18 @@ Summon your pet, then:
 | `/petname` | Shows the current pet's nickname |
 
 Nicknames are saved per character and keyed by the pet's real name, so your Imp, Voidwalker and Succubus each keep their own. Only one of them gets to be Angus, though.
+
+## Companions
+
+Your collection pets can have a nickname too. Summon your companion, then:
+
+```
+/petname Coco
+```
+
+If you have a combat pet out as well, target your companion first, so PetNickname knows which one you mean. The order is: your targeted companion, else your combat pet, else your summoned companion. `/petname reset` works the same way.
+
+Only your own companion is renamed. Another player's Black Tabby Cat stays a Black Tabby Cat. The pet collection in WoW Forever has no rename option of its own, so this is the way to give your companion a name.
 
 ## Where Angus shows up
 
